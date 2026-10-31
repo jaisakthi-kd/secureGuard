@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d18">
+  <meta name="description" content="SecureGuard AI is a defensive login monitoring and account takeover detection demo.">
+  <title>SecureGuard AI — Threat monitoring</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#dashboard" aria-label="SecureGuard AI home">
+        <span class="brand-mark"><i data-lucide="shield-check"></i></span>
+        <span class="brand-copy"><strong>SecureGuard<span> AI</span></strong><small>THREAT INTELLIGENCE</small></span>
+      </a>
+      <div class="workspace-label">WORKSPACE</div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="#dashboard" class="nav-link active" data-page="dashboard"><i data-lucide="layout-dashboard"></i><span>Overview</span></a>
+        <a href="#monitoring" class="nav-link" data-page="monitoring"><i data-lucide="activity"></i><span>Login monitoring</span><span class="nav-count" id="monitor-count">12</span></a>
+        <a href="#analysis" class="nav-link" data-page="analysis"><i data-lucide="scan-search"></i><span>Risk analysis</span></a>
+        <a href="#takeover" class="nav-link" data-page="takeover"><i data-lucide="shield-alert"></i><span>Takeover alerts</span><span class="nav-count danger" id="alert-count">0</span></a>
+        <a href="#reports" class="nav-link" data-page="reports"><i data-lucide="chart-no-axes-combined"></i><span>Reports & analytics</span></a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="system-card">
+          <div class="system-top"><span class="pulse-dot"></span><span>All systems operational</span></div>
+          <p>Detection engine is monitoring login activity.</p>
+          <div class="system-line"><span>DETECTION ENGINE</span><strong>ACTIVE</strong></div>
+        </div>
+        <div class="profile">
+          <div class="avatar">SG</div>
+          <div class="profile-copy"><strong>Security Admin</strong><small>Administrator</small></div>
+          <button class="icon-button" id="reset-button" title="Reset demo data" aria-label="Reset demo data"><i data-lucide="rotate-ccw"></i></button>
+        </div>
+        <div class="demo-note"><i data-lucide="info"></i> Educational demo · simulated actions only</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="icon-button menu-button" id="menu-button" aria-label="Open navigation"><i data-lucide="menu"></i></button>
+        <div class="breadcrumb"><span>SecureGuard AI</span><i data-lucide="chevron-right"></i><strong id="breadcrumb-current">Overview</strong></div>
+        <div class="topbar-right">
+          <div class="live-status"><span class="pulse-dot"></span> LIVE MONITORING</div>
+          <button class="icon-button notification-button" id="notification-button" title="View alerts" aria-label="View alerts">
+            <i data-lucide="bell"></i><span class="notification-dot"></span>
+          </button>
+          <div class="top-avatar">SG</div>
+        </div>
+      </header>
+
+      <div class="page-wrap">
+        <section class="page active" id="page-dashboard">
+          <div class="page-heading">
+            <div><div class="eyebrow"><span class="eyebrow-line"></span> SECURITY OVERVIEW</div><h1>Good morning, Admin <span class="wave">✦</span></h1><p class="subtitle">Here’s what’s happening across your login activity.</p></div>
+            <div class="heading-actions"><span class="date-chip"><i data-lucide="calendar-days"></i><span id="current-date"></span></span><button class="button button-secondary" data-navigate="reports"><i data-lucide="download"></i> Export report</button></div>
+          </div>
+          <div class="stats-grid">
+            <article class="stat-card"><div class="stat-top"><span>Total login attempts</span><span class="stat-icon blue"><i data-lucide="scan-line"></i></span></div><div class="stat-value" id="stat-total">—</div><div class="stat-foot"><span class="stat-caption">Events monitored</span><span class="stat-trend neutral"><i data-lucide="activity"></i> All time</span></div></article>
+            <article class="stat-card"><div class="stat-top"><span>Successful logins</span><span class="stat-icon green"><i data-lucide="circle-check"></i></span></div><div class="stat-value" id="stat-success">—</div><div class="stat-foot"><span class="stat-caption">Verified sessions</span><span class="stat-trend positive"><i data-lucide="trending-up"></i> Healthy</span></div></article>
+            <article class="stat-card"><div class="stat-top"><span>Failed attempts</span><span class="stat-icon orange"><i data-lucide="circle-x"></i></span></div><div class="stat-value" id="stat-failed">—</div><div class="stat-foot"><span class="stat-caption">Unsuccessful sign-ins</span><span class="stat-trend warning"><i data-lucide="activity"></i> Monitor</span></div></article>
+            <article class="stat-card"><div class="stat-top"><span>Suspicious logins</span><span class="stat-icon red"><i data-lucide="scan-eye"></i></span></div><div class="stat-value" id="stat-suspicious">—</div><div class="stat-foot"><span class="stat-caption">Medium + high risk</span><span class="stat-trend danger-text"><i data-lucide="shield-alert"></i> Detected</span></div></article>
+          </div>
+          <div class="dashboard-grid">
+            <article class="panel activity-panel"><div class="panel-heading"><div><h2>Login activity</h2><p>Authentication events over the last 7 days</p></div><div class="chart-legend"><span><i class="legend-dot blue-bg"></i> Successful</span><span><i class="legend-dot red-bg"></i> Failed</span></div></div><div class="chart-box"><canvas id="activity-chart" aria-label="Login activity chart"></canvas></div></article>
+            <article class="panel risk-panel"><div class="panel-heading"><div><h2>Risk overview</h2><p>Distribution by risk level</p></div><button class="icon-button subtle-button" title="Risk distribution"><i data-lucide="ellipsis"></i></button></div><div class="risk-chart-wrap"><canvas id="risk-chart" aria-label="Risk level chart"></canvas><div class="donut-center"><strong id="risk-total">0</strong><span>EVENTS</span></div></div><div class="risk-legend"><div><span class="legend-dot green-bg"></span><span>Low risk</span><strong id="risk-low">0</strong></div><div><span class="legend-dot orange-bg"></span><span>Medium risk</span><strong id="risk-medium">0</strong></div><div><span class="legend-dot red-bg"></span><span>High risk</span><strong id="risk-high">0</strong></div></div></article>
+            <article class="panel recent-panel"><div class="panel-heading"><div><h2>Recent login activity</h2><p>Latest authentication events</p></div><button class="text-button" data-navigate="monitoring">View all <i data-lucide="arrow-up-right"></i></button></div><div class="table-wrap"><table><thead><tr><th>USER</th><th>LOCATION</th><th>STATUS</th><th>RISK</th><th>TIME</th></tr></thead><tbody id="recent-events"></tbody></table></div></article>
+            <article class="panel alerts-panel"><div class="panel-heading"><div><h2>Latest alerts</h2><p>Events that need your attention</p></div><button class="text-button" data-navigate="takeover">View all <i data-lucide="arrow-up-right"></i></button></div><div class="alert-list" id="dashboard-alerts"></div></article>
+          </div>
+          <div class="prototype-banner"><i data-lucide="info"></i><span><strong>Prototype mode:</strong> Login data and security actions are simulated for educational use. No real accounts or IP addresses are affected.</span></div>
+        </section>
+
+        <section class="page" id="page-monitoring">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> AUTHENTICATION</div><h1>Login monitoring</h1><p class="subtitle">Search, filter, and inspect authentication events across your workspace.</p></div><button class="button button-secondary" id="monitor-export"><i data-lucide="download"></i> Export CSV</button></div>
+          <div class="monitor-summary" id="monitor-summary"></div>
+          <div class="panel data-panel"><div class="table-toolbar"><div class="search-box"><i data-lucide="search"></i><input id="event-search" type="search" placeholder="Search username, IP, location..." aria-label="Search login events"></div><div class="toolbar-filters"><label class="sr-only" for="risk-filter">Risk level</label><select id="risk-filter"><option value="">All risk levels</option><option>Low</option><option>Medium</option><option>High</option></select><label class="sr-only" for="status-filter">Status</label><select id="status-filter"><option value="">All statuses</option><option>Success</option><option>Failed</option></select></div></div><div class="table-wrap"><table class="wide-table"><thead><tr><th>USER</th><th>IP ADDRESS</th><th>LOCATION</th><th>DEVICE</th><th>LOGIN TIME</th><th>STATUS</th><th>RISK SCORE</th></tr></thead><tbody id="events-table"></tbody></table></div><div class="table-empty hidden" id="events-empty">No login events match those filters.</div></div>
+        </section>
+
+        <section class="page" id="page-analysis">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> INTELLIGENCE ENGINE</div><h1>Analyze a login</h1><p class="subtitle">Evaluate a simulated sign-in against behavioral and contextual risk signals.</p></div><span class="engine-pill"><span class="pulse-dot"></span> RULE ENGINE ACTIVE</span></div>
+          <div class="analysis-layout">
+            <article class="panel analysis-form-panel"><div class="panel-heading"><div><h2>Login event details</h2><p>Enter the sign-in context you want to inspect.</p></div><span class="step-badge">01 / INPUT</span></div>
+              <form id="analysis-form">
+                <div class="form-grid"><label class="field full"><span>Username <b>*</b></span><div class="input-wrap"><i data-lucide="user-round"></i><input name="username" required placeholder="e.g. maya.chen" value="maya.chen"></div></label>
+                  <label class="field"><span>IP address <b>*</b></span><div class="input-wrap"><i data-lucide="network"></i><input name="ip_address" required placeholder="e.g. 198.51.100.24" value="192.0.2.222"></div></label>
+                  <label class="field"><span>Location <b>*</b></span><div class="input-wrap"><i data-lucide="map-pin"></i><input name="location" required placeholder="e.g. San Francisco, US" value="Lagos, NG"></div></label>
+                  <label class="field full"><span>Device information <b>*</b></span><div class="input-wrap"><i data-lucide="laptop"></i><input name="device" required placeholder="e.g. MacBook Pro · Chrome" value="Android · Firefox"></div></label>
+                  <label class="field"><span>Login date & time</span><div class="input-wrap"><i data-lucide="clock-3"></i><input name="login_time" id="login-time-input" type="datetime-local"></div></label>
+                  <label class="field"><span>Failed attempt count</span><div class="input-wrap"><i data-lucide="circle-x"></i><input name="failed_attempts" type="number" min="0" max="100" value="4"></div></label>
+                </div>
+                <div class="form-note"><i data-lucide="info"></i> Uses demo login history to identify unfamiliar IPs, locations, and devices.</div>
+                <button class="button button-primary analyze-button" type="submit"><i data-lucide="scan-search"></i> Analyze login <i data-lucide="arrow-right"></i></button>
+              </form>
+            </article>
+            <article class="panel result-panel" id="analysis-result"><div class="result-placeholder"><span class="placeholder-icon"><i data-lucide="scan-line"></i></span><h2>Ready to analyze</h2><p>Submit a simulated login to see its risk score, detection reasons, and recommended actions.</p><div class="placeholder-points"><span><i data-lucide="check"></i> Behavioral signals</span><span><i data-lucide="check"></i> Explainable results</span><span><i data-lucide="check"></i> Actionable guidance</span></div></div></article>
+          </div>
+          <div class="rule-grid"><div class="rule-item"><span class="rule-icon red"><i data-lucide="key-round"></i></span><div><strong>Failed attempts</strong><small>Repeated unsuccessful sign-ins</small></div><span class="rule-weight">+10–35</span></div><div class="rule-item"><span class="rule-icon orange"><i data-lucide="map-pin"></i></span><div><strong>IP & location</strong><small>Unfamiliar network or region</small></div><span class="rule-weight">+20 each</span></div><div class="rule-item"><span class="rule-icon blue"><i data-lucide="laptop"></i></span><div><strong>Device & behavior</strong><small>New device or unusual sign-in time</small></div><span class="rule-weight">+15</span></div></div>
+        </section>
+
+        <section class="page" id="page-takeover">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> INCIDENT RESPONSE</div><h1>Takeover alerts</h1><p class="subtitle">Review high-risk activity and take simulated response actions.</p></div><div class="critical-chip"><span class="critical-dot"></span><span id="open-alert-total">0</span> OPEN INCIDENTS</div></div>
+          <div class="alert-metrics" id="alert-metrics"></div>
+          <div class="takeover-list" id="takeover-list"></div>
+        </section>
+
+        <section class="page" id="page-reports">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> SECURITY INSIGHTS</div><h1>Reports & analytics</h1><p class="subtitle">Understand authentication trends and focus on accounts at risk.</p></div><a class="button button-primary" href="/api/export"><i data-lucide="download"></i> Download CSV</a></div>
+          <div class="report-grid"><article class="panel report-chart-panel"><div class="panel-heading"><div><h2>Daily login activity</h2><p>Success and failed login events by day</p></div><span class="chart-period">LAST 7 DAYS</span></div><div class="chart-box report-chart"><canvas id="report-activity-chart"></canvas></div></article><article class="panel report-chart-panel"><div class="panel-heading"><div><h2>Failed login trends</h2><p>Failed attempts across monitored events</p></div><span class="chart-period">LAST 7 DAYS</span></div><div class="chart-box report-chart"><canvas id="failed-chart"></canvas></div></article></div>
+          <article class="panel report-table-panel"><div class="panel-heading"><div><h2>High-risk accounts</h2><p>Accounts with the most elevated login risk</p></div><span class="table-label">RISK SCORE ≥ 61</span></div><div class="table-wrap"><table><thead><tr><th>ACCOUNT</th><th>LAST SEEN IP</th><th>LOCATION</th><th>DETECTION SIGNALS</th><th>RISK SCORE</th></tr></thead><tbody id="high-risk-table"></tbody></table></div></article>
+        </section>
+
+        <footer class="footer"><span>SecureGuard AI <span class="footer-sep">·</span> Defensive security prototype</span><span><span class="footer-dot"></span> Demo environment <span class="footer-sep">·</span> v1.0</span></footer>
+      </div>
+    </main>
+    <div class="toast-region" id="toast-region" aria-live="polite"></div>
+    <div class="modal-backdrop hidden" id="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="confirm-card"><span class="modal-icon"><i data-lucide="rotate-ccw"></i></span><h2 id="modal-title">Reset demo data?</h2><p>This restores the original sample login events and alerts. Any analyzed events and alert statuses will be cleared.</p><div class="modal-actions"><button class="button button-secondary" id="cancel-reset">Cancel</button><button class="button button-danger" id="confirm-reset">Reset demo data</button></div></div></div>
+  </div>
+</body>
+</html>
